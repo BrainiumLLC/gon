@@ -1,11 +1,45 @@
 use crate::tess;
 
 #[derive(Clone, Debug)]
-pub struct Options {
-    pub color: [f32; 4],
-    pub tessellation: Tessellation,
+pub struct StrokeOptions {
     pub texture_aspect_ratio: f32,
     pub stroke_width: f32,
+    _prevent_destructuring: (),
+}
+
+impl Default for StrokeOptions {
+    fn default() -> Self {
+        Self {
+            texture_aspect_ratio: 1.0,
+            stroke_width: 1.0,
+            _prevent_destructuring: (),
+        }
+    }
+}
+
+impl StrokeOptions {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub fn with_stroke_width(mut self, stroke_width: f32) -> Self {
+        self.stroke_width = stroke_width;
+        self
+    }
+
+    /// This controls the rate at which the `y` texture coordinate reaches 1.
+    ///
+    /// Note: `Poly`'s generated with a stroke assume the texture will use a tiling Sampler.
+    pub fn with_texture_aspect_ratio(mut self, texture_aspect_ratio: f32) -> Self {
+        self.texture_aspect_ratio = texture_aspect_ratio;
+        self
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Options {
+    pub color: [f32; 4],
+    pub stroke_options: Option<StrokeOptions>,
     pub tolerance: f32,
     _prevent_destructuring: (),
 }
@@ -14,9 +48,7 @@ impl Default for Options {
     fn default() -> Self {
         Self {
             color: [1.0; 4],
-            tessellation: Default::default(),
-            texture_aspect_ratio: 1.0,
-            stroke_width: 1.0,
+            stroke_options: None,
             tolerance: tess::FillOptions::DEFAULT_TOLERANCE,
             _prevent_destructuring: (),
         }
@@ -29,27 +61,17 @@ impl Options {
     }
 
     pub fn with_fill(mut self) -> Self {
-        self.tessellation = Tessellation::Fill;
+        self.stroke_options = None;
         self
     }
 
-    pub fn with_stroke(mut self) -> Self {
-        self.tessellation = Tessellation::Stroke;
+    pub fn with_stroke(mut self, stroke_options: StrokeOptions) -> Self {
+        self.stroke_options = Some(stroke_options);
         self
     }
 
     pub fn with_color(mut self, color: [f32; 4]) -> Self {
         self.color = color;
-        self
-    }
-
-    pub fn with_stroke_width(mut self, stroke_width: f32) -> Self {
-        self.stroke_width = stroke_width;
-        self
-    }
-
-    pub fn with_texture_aspect_ratio(mut self, texture_aspect_ratio: f32) -> Self {
-        self.texture_aspect_ratio = texture_aspect_ratio;
         self
     }
 
@@ -59,7 +81,7 @@ impl Options {
     }
 
     pub(crate) fn fill_options(&self) -> tess::FillOptions {
-        assert_eq!(self.tessellation, Tessellation::Fill);
+        assert!(self.stroke_options.is_none());
         tess::FillOptions::default()
             .with_normals(false)
             .with_tolerance(self.tolerance)
@@ -67,22 +89,14 @@ impl Options {
     }
 
     pub(crate) fn stroke_options(&self) -> tess::StrokeOptions {
-        assert_eq!(self.tessellation, Tessellation::Stroke);
+        let StrokeOptions {
+            stroke_width,
+            texture_aspect_ratio: _,
+            _prevent_destructuring,
+        } = self.stroke_options.clone().unwrap();
         tess::StrokeOptions::default()
             .with_tolerance(self.tolerance)
-            .with_line_width(self.stroke_width)
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Tessellation {
-    Fill,
-    Stroke,
-}
-
-impl Default for Tessellation {
-    fn default() -> Self {
-        Tessellation::Fill
+            .with_line_width(stroke_width)
     }
 }
 
@@ -100,24 +114,18 @@ macro_rules! _options_forwarder {
 }
 
 macro_rules! options_forwarder {
-    (fixed_tessellation) => {
+    (no_fill) => {
         _options_forwarder!{
             with_color(color: [f32; 4]),
-            with_stroke_width(stroke_width: f32),
-            with_texture_aspect_ratio(texture_aspect_ratio: f32),
+            with_stroke(stroke_options: StrokeOptions),
             with_tolerance(tolerance: f32),
         }
     };
     () => {
-        options_forwarder!{fixed_tessellation}
+        options_forwarder!{no_fill}
 
         pub fn with_fill(mut self) -> Self {
             self.options = self.options.with_fill();
-            self
-        }
-
-        pub fn with_stroke(mut self) -> Self {
-            self.options = self.options.with_stroke();
             self
         }
     };

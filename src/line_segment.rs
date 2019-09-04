@@ -1,5 +1,5 @@
 use crate::{
-    options::{Options, Tessellation},
+    options::{Options, StrokeOptions},
     tess,
     vertex::{StrokeVertexConstructor, Vertex},
     Poly, PolyBuilder,
@@ -15,7 +15,7 @@ impl Default for LineSegmentBuilder {
     fn default() -> Self {
         Self {
             line: gee::LineSegment::new(gee::Point::new(0.0, 0.0), gee::Point::new(1.0, 0.0)),
-            options: Options::default().with_stroke(),
+            options: Options::default().with_stroke(Default::default()),
         }
     }
 }
@@ -30,7 +30,7 @@ impl LineSegmentBuilder {
         self
     }
 
-    options_forwarder! {fixed_tessellation}
+    options_forwarder! {no_fill}
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
         crate::try_build(self)
@@ -46,9 +46,9 @@ impl PolyBuilder for LineSegmentBuilder {
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
     ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.tessellation {
-            Tessellation::Fill => panic!("cannot Tessellate a Line using `Fill`"),
-            Tessellation::Stroke => tess::basic_shapes::stroke_polyline(
+        let _count = match self.options.stroke_options.clone() {
+            None => panic!("cannot Tessellate a Line using `Fill`"),
+            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
                 [crate::point(self.line.from), crate::point(self.line.to)]
                     .iter()
                     .cloned(),
@@ -58,8 +58,8 @@ impl PolyBuilder for LineSegmentBuilder {
                     vertex_buffers,
                     StrokeVertexConstructor::new(
                         self.options.color,
-                        self.options.stroke_width,
-                        self.options.texture_aspect_ratio,
+                        stroke_options.stroke_width,
+                        stroke_options.texture_aspect_ratio,
                     ),
                 ),
             )?,

@@ -12,16 +12,14 @@ pub(crate) struct FillVertexConstructor {
     // cached version of gee::Rect in the format we want
     pub top_left: gee::Point<f32>,
     pub size: gee::Size<f32>,
-    pub texture_aspect_ratio: f32,
 }
 
 impl FillVertexConstructor {
-    pub fn new(color: [f32; 4], bounding_box: gee::Rect<f32>, texture_aspect_ratio: f32) -> Self {
+    pub fn new(color: [f32; 4], bounding_box: gee::Rect<f32>) -> Self {
         Self {
             color,
             top_left: bounding_box.top_left(),
             size: bounding_box.size(),
-            texture_aspect_ratio,
         }
     }
 }
@@ -33,7 +31,7 @@ impl tess::VertexConstructor<tess::FillVertex, Vertex> for FillVertexConstructor
         let rel_coord = pos - self.top_left;
         let tex_coord = gee::Point::new(
             rel_coord.dx / self.size.width,
-            rel_coord.dy / self.size.height / self.texture_aspect_ratio,
+            rel_coord.dy / self.size.height,
         );
         Vertex {
             pos,

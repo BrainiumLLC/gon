@@ -1,5 +1,5 @@
 use crate::{
-    options::{Options, Tessellation},
+    options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
     Poly, PolyBuilder,
@@ -42,21 +42,17 @@ impl PolyBuilder for CircleBuilder {
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
     ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.tessellation {
-            Tessellation::Fill => tess::basic_shapes::fill_circle(
+        let _count = match self.options.stroke_options.clone() {
+            None => tess::basic_shapes::fill_circle(
                 crate::point(self.circle.center),
                 self.circle.radius,
                 &self.options.fill_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
-                    FillVertexConstructor::new(
-                        self.options.color,
-                        self.circle.bounding_rect(),
-                        self.options.texture_aspect_ratio,
-                    ),
+                    FillVertexConstructor::new(self.options.color, self.circle.bounding_rect()),
                 ),
             )?,
-            Tessellation::Stroke => tess::basic_shapes::stroke_circle(
+            Some(stroke_options) => tess::basic_shapes::stroke_circle(
                 crate::point(self.circle.center),
                 self.circle.radius,
                 &self.options.stroke_options(),
@@ -64,8 +60,8 @@ impl PolyBuilder for CircleBuilder {
                     vertex_buffers,
                     StrokeVertexConstructor::new(
                         self.options.color,
-                        self.options.stroke_width,
-                        self.options.texture_aspect_ratio,
+                        stroke_options.stroke_width,
+                        stroke_options.texture_aspect_ratio,
                     ),
                 ),
             )?,

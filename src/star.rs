@@ -1,5 +1,5 @@
 use crate::{
-    options::{Options, Tessellation},
+    options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
     Poly, PolyBuilder,
@@ -27,22 +27,23 @@ impl Default for StarBuilder {
 }
 
 impl StarBuilder {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(tips: u32) -> Self {
+        assert!(
+            tips >= 3,
+            "`Star`'s must have atleast 3 tips, but this one has {}",
+            tips
+        );
+        let mut result = Self::default();
+        result.tips = tips;
+        result
     }
 
     pub fn pentagram() -> Self {
-        Self::default().with_tips(5)
+        Self::new(5)
     }
 
     pub fn hexagram() -> Self {
-        Self::default().with_tips(6)
-    }
-
-    pub fn with_tips(mut self, tips: u32) -> Self {
-        assert!(tips >= 3, "can't build a star with `{}` tips", tips);
-        self.tips = tips;
-        self
+        Self::new(6)
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
@@ -55,7 +56,14 @@ impl StarBuilder {
         self
     }
 
+    /// The lower this value, the more pointy the star is.
+    ///
+    /// Values for `inner_radius_over_radius` must be in the range (0, 1].
     pub fn with_inner_radius_ratio(mut self, inner_radius_over_radius: f32) -> Self {
+        assert!(
+            inner_radius_over_radius > 0.0 && inner_radius_over_radius <= 1.0,
+            "`inner_radius_ratio` must be in the range `(0, 1]`"
+        );
         self.inner_radius_over_radius = inner_radius_over_radius;
         self
     }
@@ -90,21 +98,16 @@ impl PolyBuilder for StarBuilder {
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
     ) -> Result<(), tess::TessellationError> {
-        self.options.texture_aspect_ratio;
-        let _count = match self.options.tessellation {
-            Tessellation::Fill => tess::basic_shapes::fill_convex_polyline(
+        let _count = match self.options.stroke_options.clone() {
+            None => tess::basic_shapes::fill_convex_polyline(
                 self.points(),
                 &self.options.fill_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
-                    FillVertexConstructor::new(
-                        self.options.color,
-                        self.circle.bounding_rect(),
-                        self.options.texture_aspect_ratio,
-                    ),
+                    FillVertexConstructor::new(self.options.color, self.circle.bounding_rect()),
                 ),
             )?,
-            Tessellation::Stroke => tess::basic_shapes::stroke_polyline(
+            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
                 self.points(),
                 true, // closed
                 &self.options.stroke_options(),
@@ -112,8 +115,8 @@ impl PolyBuilder for StarBuilder {
                     vertex_buffers,
                     StrokeVertexConstructor::new(
                         self.options.color,
-                        self.options.stroke_width,
-                        self.options.texture_aspect_ratio,
+                        stroke_options.stroke_width,
+                        stroke_options.texture_aspect_ratio,
                     ),
                 ),
             )?,

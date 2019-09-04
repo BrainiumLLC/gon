@@ -1,5 +1,5 @@
 use crate::{
-    options::{Options, Tessellation},
+    options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
     Poly, PolyBuilder,
@@ -23,32 +23,39 @@ impl Default for RegularPolyBuilder {
 }
 
 impl RegularPolyBuilder {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(sides: u32) -> Self {
+        assert!(
+            sides >= 3,
+            "`Poly`'s must have atleast 3 sides, but this one has {}",
+            sides
+        );
+        let mut result = Self::default();
+        result.sides = sides;
+        result
     }
 
     pub fn triangle() -> Self {
-        Self::default().with_sides(3)
+        Self::new(3)
     }
 
     pub fn quadrilateral() -> Self {
-        Self::default().with_sides(4)
+        Self::new(4)
     }
 
     pub fn pentagon() -> Self {
-        Self::default().with_sides(5)
+        Self::new(5)
     }
 
     pub fn hexagon() -> Self {
-        Self::default().with_sides(6)
+        Self::new(6)
     }
 
     pub fn octagon() -> Self {
-        Self::default().with_sides(8)
+        Self::new(8)
     }
 
     pub fn decagon() -> Self {
-        Self::default().with_sides(10)
+        Self::new(10)
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
@@ -58,12 +65,6 @@ impl RegularPolyBuilder {
 
     pub fn with_radius(mut self, radius: f32) -> Self {
         self.circle.radius = radius;
-        self
-    }
-
-    pub fn with_sides(mut self, sides: u32) -> Self {
-        assert!(sides >= 3, "can't build a star with `{}` sides", sides);
-        self.sides = sides;
         self
     }
 
@@ -89,21 +90,16 @@ impl PolyBuilder for RegularPolyBuilder {
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
     ) -> Result<(), tess::TessellationError> {
-        self.options.texture_aspect_ratio;
-        let _count = match self.options.tessellation {
-            Tessellation::Fill => tess::basic_shapes::fill_convex_polyline(
+        let _count = match self.options.stroke_options.clone() {
+            None => tess::basic_shapes::fill_convex_polyline(
                 self.points(),
                 &self.options.fill_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
-                    FillVertexConstructor::new(
-                        self.options.color,
-                        self.circle.bounding_rect(),
-                        self.options.texture_aspect_ratio,
-                    ),
+                    FillVertexConstructor::new(self.options.color, self.circle.bounding_rect()),
                 ),
             )?,
-            Tessellation::Stroke => tess::basic_shapes::stroke_polyline(
+            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
                 self.points(),
                 true, // closed
                 &self.options.stroke_options(),
@@ -111,8 +107,8 @@ impl PolyBuilder for RegularPolyBuilder {
                     vertex_buffers,
                     StrokeVertexConstructor::new(
                         self.options.color,
-                        self.options.stroke_width,
-                        self.options.texture_aspect_ratio,
+                        stroke_options.stroke_width,
+                        stroke_options.texture_aspect_ratio,
                     ),
                 ),
             )?,

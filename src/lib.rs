@@ -10,6 +10,7 @@ mod vertex;
 pub use circle::CircleBuilder;
 pub use line_segment::LineSegmentBuilder;
 pub use lyon_tessellation as tess;
+pub use options::StrokeOptions;
 pub use regular_poly::RegularPolyBuilder;
 pub use star::StarBuilder;
 pub use vertex::Vertex;
