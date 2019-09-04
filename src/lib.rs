@@ -3,15 +3,15 @@ mod options;
 
 mod circle;
 mod line_segment;
-mod regular_star;
 mod regular_poly;
+mod star;
 mod vertex;
 
 pub use circle::CircleBuilder;
 pub use line_segment::LineSegmentBuilder;
 pub use lyon_tessellation as tess;
 pub use regular_poly::RegularPolyBuilder;
-pub use regular_star::RegularStarBuilder;
+pub use star::StarBuilder;
 pub use vertex::Vertex;
 
 #[derive(Clone, Debug)]
