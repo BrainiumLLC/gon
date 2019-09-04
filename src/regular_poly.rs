@@ -71,7 +71,7 @@ impl RegularPolyBuilder {
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         self.circle
-            .circle_points(self.sides, gee::Angle::FRAC_PI_2())
+            .circle_points(self.sides, -gee::Angle::<f32>::FRAC_PI_2())
             .map(|point| tess::math::point(point.x, point.y))
     }
 

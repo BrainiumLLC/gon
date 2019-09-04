@@ -63,7 +63,7 @@ impl RegularStarBuilder {
     options_forwarder! {}
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
-        let top_angle = gee::Angle::FRAC_PI_2();
+        let top_angle = -gee::Angle::<f32>::FRAC_PI_2();
         let inner_offset = gee::Angle::PI() / self.tips as f32;
         let inner_circle = {
             let mut inner_circle = self.circle;
