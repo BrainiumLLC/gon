@@ -62,6 +62,7 @@ impl RegularNGonBuilder {
     }
 
     pub fn with_sides(mut self, sides: u32) -> Self {
+        assert!(sides >= 3, "can't build a star with `{}` sides", sides);
         self.sides = sides;
         self
     }

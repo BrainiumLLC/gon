@@ -4,12 +4,13 @@ use crate::{
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
     Poly, PolyBuilder,
 };
+use itertools::Itertools as _;
 
 #[derive(Clone, Debug)]
 pub struct RegularNStarBuilder {
     circle: gee::Circle<f32>,
     inner_radius_over_radius: f32,
-    sides: u32,
+    tips: u32,
     options: Options,
 }
 
@@ -19,7 +20,7 @@ impl Default for RegularNStarBuilder {
         Self {
             circle,
             inner_radius_over_radius: 0.5,
-            sides: 5,
+            tips: 5,
             options: Default::default(),
         }
     }
@@ -31,15 +32,16 @@ impl RegularNStarBuilder {
     }
 
     pub fn pentagram() -> Self {
-        Self::default().with_sides(5)
+        Self::default().with_tips(5)
     }
 
     pub fn hexagram() -> Self {
-        Self::default().with_sides(6)
+        Self::default().with_tips(6)
     }
 
-    pub fn with_sides(mut self, sides: u32) -> Self {
-        self.sides = sides;
+    pub fn with_tips(mut self, tips: u32) -> Self {
+        assert!(tips >= 3, "can't build a star with `{}` tips", tips);
+        self.tips = tips;
         self
     }
 
@@ -62,16 +64,15 @@ impl RegularNStarBuilder {
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         let top_angle = gee::Angle::FRAC_PI_2();
-        let inner_offset = gee::Angle::PI() / self.sides as f32;
+        let inner_offset = gee::Angle::PI() / self.tips as f32;
         let inner_circle = {
             let mut inner_circle = self.circle;
             inner_circle.radius *= self.inner_radius_over_radius;
             inner_circle
         };
         self.circle
-            .circle_points(self.sides, top_angle)
-            .zip(inner_circle.circle_points(self.sides, top_angle + inner_offset))
-            .flat_map(|(tip, inner)| std::iter::once(tip).chain(std::iter::once(inner)))
+            .circle_points(self.tips, top_angle)
+            .interleave(inner_circle.circle_points(self.tips, top_angle + inner_offset))
             .map(|p| crate::point(p))
     }
 

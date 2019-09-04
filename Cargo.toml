@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 gee = { git = "https://github.com/BrainiumLLC/gee", features = ["euclid"] }
+itertools = "0.8.0"
 lyon_tessellation = "0.14.1"
