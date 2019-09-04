@@ -6,13 +6,13 @@ use crate::{
 };
 
 #[derive(Clone, Debug)]
-pub struct RegularNGonBuilder {
+pub struct RegularPolyBuilder {
     circle: gee::Circle<f32>,
     sides: u32,
     options: Options,
 }
 
-impl Default for RegularNGonBuilder {
+impl Default for RegularPolyBuilder {
     fn default() -> Self {
         Self {
             circle: Default::default(),
@@ -22,7 +22,7 @@ impl Default for RegularNGonBuilder {
     }
 }
 
-impl RegularNGonBuilder {
+impl RegularPolyBuilder {
     pub fn new() -> Self {
         Default::default()
     }
@@ -84,7 +84,7 @@ impl RegularNGonBuilder {
     }
 }
 
-impl PolyBuilder for RegularNGonBuilder {
+impl PolyBuilder for RegularPolyBuilder {
     fn build_in_place(
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,

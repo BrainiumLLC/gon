@@ -7,14 +7,14 @@ use crate::{
 use itertools::Itertools as _;
 
 #[derive(Clone, Debug)]
-pub struct RegularNStarBuilder {
+pub struct RegularStarBuilder {
     circle: gee::Circle<f32>,
     inner_radius_over_radius: f32,
     tips: u32,
     options: Options,
 }
 
-impl Default for RegularNStarBuilder {
+impl Default for RegularStarBuilder {
     fn default() -> Self {
         let circle = Default::default();
         Self {
@@ -26,7 +26,7 @@ impl Default for RegularNStarBuilder {
     }
 }
 
-impl RegularNStarBuilder {
+impl RegularStarBuilder {
     pub fn new() -> Self {
         Default::default()
     }
@@ -85,7 +85,7 @@ impl RegularNStarBuilder {
     }
 }
 
-impl PolyBuilder for RegularNStarBuilder {
+impl PolyBuilder for RegularStarBuilder {
     fn build_in_place(
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
