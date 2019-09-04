@@ -1,12 +1,11 @@
 [package]
 name = "pee"
 version = "0.1.0"
-authors = ["tyler <tyler@brainiumstudios.com>"]
+authors = ["Brainium Studios LLC"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "Brainium-Proprietary"
 
 [dependencies]
-gee = { git = "https://github.com/BrainiumLLC/gee", features = ["euclid"] }
+gee = { git = "https://github.com/BrainiumLLC/gee" }
 itertools = "0.8.0"
 lyon_tessellation = "0.14.1"

@@ -2,7 +2,7 @@ use crate::tess;
 
 #[derive(Clone, Debug)]
 pub struct Options {
-    pub color: gee::Vec4<f32>,
+    pub color: [f32; 4],
     pub tessellation: Tessellation,
     pub texture_aspect_ratio: f32,
     pub stroke_width: f32,
@@ -13,7 +13,7 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
-            color: gee::Vec4::new(1.0, 1.0, 1.0, 1.0),
+            color: [1.0; 4],
             tessellation: Default::default(),
             texture_aspect_ratio: 1.0,
             stroke_width: 1.0,
@@ -38,7 +38,7 @@ impl Options {
         self
     }
 
-    pub fn with_color(mut self, color: gee::Vec4<f32>) -> Self {
+    pub fn with_color(mut self, color: [f32; 4]) -> Self {
         self.color = color;
         self
     }
@@ -102,7 +102,7 @@ macro_rules! _options_forwarder {
 macro_rules! options_forwarder {
     (fixed_tessellation) => {
         _options_forwarder!{
-            with_color(color: gee::Vec4<f32>),
+            with_color(color: [f32; 4]),
             with_stroke_width(stroke_width: f32),
             with_texture_aspect_ratio(texture_aspect_ratio: f32),
             with_tolerance(tolerance: f32),
