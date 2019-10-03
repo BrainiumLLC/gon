@@ -18,7 +18,7 @@ impl Default for LineSegmentBuilder {
                 gee::Point::new(0.0, 0.0),
                 gee::Point::new(DEFAULT_RADIUS * 2.0, 0.0),
             ),
-            options: Options::default().with_stroke(Default::default()),
+            options: Options::default().stroke(Default::default()),
         }
     }
 }
@@ -28,7 +28,7 @@ impl LineSegmentBuilder {
         Default::default()
     }
 
-    pub fn with_line_segment(mut self, line: gee::LineSegment<f32>) -> Self {
+    pub fn line_segment(mut self, line: gee::LineSegment<f32>) -> Self {
         self.line = line;
         self
     }

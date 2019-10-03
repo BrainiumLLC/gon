@@ -22,12 +22,12 @@ impl CircleBuilder {
         }
     }
 
-    pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
+    pub fn center(mut self, center: gee::Point<f32>) -> Self {
         self.circle.center = center;
         self
     }
 
-    pub fn with_radius(mut self, radius: f32) -> Self {
+    pub fn radius(mut self, radius: f32) -> Self {
         self.circle.radius = radius;
         self
     }
