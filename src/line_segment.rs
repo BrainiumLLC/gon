@@ -2,7 +2,7 @@ use crate::{
     options::{Options, StrokeOptions},
     tess,
     vertex::{StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    Poly, PolyBuilder, DEFAULT_RADIUS,
 };
 
 #[derive(Clone, Debug)]
@@ -14,7 +14,10 @@ pub struct LineSegmentBuilder {
 impl Default for LineSegmentBuilder {
     fn default() -> Self {
         Self {
-            line: gee::LineSegment::new(gee::Point::new(0.0, 0.0), gee::Point::new(1.0, 0.0)),
+            line: gee::LineSegment::new(
+                gee::Point::new(0.0, 0.0),
+                gee::Point::new(DEFAULT_RADIUS * 2.0, 0.0),
+            ),
             options: Options::default().with_stroke(Default::default()),
         }
     }

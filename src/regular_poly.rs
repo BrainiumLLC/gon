@@ -2,21 +2,26 @@ use crate::{
     options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    Poly, PolyBuilder, DEFAULT_RADIUS, DEFAULT_START_ANGLE,
 };
 
 #[derive(Clone, Debug)]
 pub struct RegularPolyBuilder {
     circle: gee::Circle<f32>,
     sides: u32,
+    start_angle: gee::Angle<f32>,
     options: Options,
 }
 
 impl Default for RegularPolyBuilder {
     fn default() -> Self {
         Self {
-            circle: Default::default(),
+            circle: gee::Circle {
+                radius: DEFAULT_RADIUS,
+                ..Default::default()
+            },
             sides: 3,
+            start_angle: DEFAULT_START_ANGLE,
             options: Default::default(),
         }
     }
@@ -68,11 +73,16 @@ impl RegularPolyBuilder {
         self
     }
 
+    pub fn with_rotation(mut self, start_angle: gee::Angle<f32>) -> Self {
+        self.start_angle = start_angle;
+        self
+    }
+
     options_forwarder! {}
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         self.circle
-            .circle_points(self.sides, -gee::Angle::<f32>::FRAC_PI_2())
+            .circle_points(self.sides, self.start_angle)
             .map(|point| tess::math::point(point.x, point.y))
     }
 

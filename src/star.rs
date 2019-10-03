@@ -2,7 +2,7 @@ use crate::{
     options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    Poly, PolyBuilder, DEFAULT_RADIUS, DEFAULT_START_ANGLE,
 };
 use itertools::Itertools as _;
 
@@ -11,16 +11,20 @@ pub struct StarBuilder {
     circle: gee::Circle<f32>,
     inner_radius_over_radius: f32,
     tips: u32,
+    start_angle: gee::Angle<f32>,
     options: Options,
 }
 
 impl Default for StarBuilder {
     fn default() -> Self {
-        let circle = Default::default();
         Self {
-            circle,
+            circle: gee::Circle {
+                radius: DEFAULT_RADIUS,
+                ..Default::default()
+            },
             inner_radius_over_radius: 0.5,
             tips: 5,
+            start_angle: DEFAULT_START_ANGLE,
             options: Default::default(),
         }
     }
@@ -56,6 +60,11 @@ impl StarBuilder {
         self
     }
 
+    pub fn with_rotation(mut self, start_angle: gee::Angle<f32>) -> Self {
+        self.start_angle = start_angle;
+        self
+    }
+
     /// The lower this value, the more pointy the star is.
     ///
     /// Values for `inner_radius_over_radius` must be in the range (0, 1].
@@ -71,7 +80,7 @@ impl StarBuilder {
     options_forwarder! {}
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
-        let top_angle = -gee::Angle::<f32>::FRAC_PI_2();
+        let top_angle = self.start_angle;
         let inner_offset = gee::Angle::PI() / self.tips as f32;
         let inner_circle = {
             let mut inner_circle = self.circle;

@@ -2,7 +2,7 @@ use crate::{
     options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    Poly, PolyBuilder, DEFAULT_RADIUS,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -13,7 +13,13 @@ pub struct CircleBuilder {
 
 impl CircleBuilder {
     pub fn new() -> Self {
-        Default::default()
+        Self {
+            circle: gee::Circle {
+                radius: DEFAULT_RADIUS,
+                ..Default::default()
+            },
+            options: Default::default(),
+        }
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
