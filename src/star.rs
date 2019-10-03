@@ -50,17 +50,17 @@ impl StarBuilder {
         Self::new(6)
     }
 
-    pub fn center(mut self, center: gee::Point<f32>) -> Self {
+    pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
         self.circle.center = center;
         self
     }
 
-    pub fn radius(mut self, radius: f32) -> Self {
+    pub fn with_radius(mut self, radius: f32) -> Self {
         self.circle.radius = radius;
         self
     }
 
-    pub fn rotation(mut self, start_angle: gee::Angle<f32>) -> Self {
+    pub fn with_rotation(mut self, start_angle: gee::Angle<f32>) -> Self {
         self.start_angle = start_angle;
         self
     }
@@ -68,7 +68,7 @@ impl StarBuilder {
     /// The lower this value, the more pointy the star is.
     ///
     /// Values for `inner_radius_over_radius` must be in the range (0, 1].
-    pub fn inner_radius_ratio(mut self, inner_radius_over_radius: f32) -> Self {
+    pub fn with_inner_radius_ratio(mut self, inner_radius_over_radius: f32) -> Self {
         assert!(
             inner_radius_over_radius > 0.0 && inner_radius_over_radius <= 1.0,
             "`inner_radius_ratio` must be in the range `(0, 1]`"

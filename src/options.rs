@@ -22,7 +22,7 @@ impl StrokeOptions {
         Default::default()
     }
 
-    pub fn stroke_width(mut self, stroke_width: f32) -> Self {
+    pub fn with_stroke_width(mut self, stroke_width: f32) -> Self {
         self.stroke_width = stroke_width;
         self
     }
@@ -30,7 +30,7 @@ impl StrokeOptions {
     /// This controls the rate at which the `y` texture coordinate reaches 1.
     ///
     /// Note: `Poly`'s generated with a stroke assume the texture will use a tiling Sampler.
-    pub fn texture_aspect_ratio(mut self, texture_aspect_ratio: f32) -> Self {
+    pub fn with_texture_aspect_ratio(mut self, texture_aspect_ratio: f32) -> Self {
         self.texture_aspect_ratio = texture_aspect_ratio;
         self
     }
@@ -60,22 +60,22 @@ impl Options {
         Default::default()
     }
 
-    pub fn fill(mut self) -> Self {
+    pub fn with_fill(mut self) -> Self {
         self.stroke_options = None;
         self
     }
 
-    pub fn stroke(mut self, stroke_options: StrokeOptions) -> Self {
+    pub fn with_stroke(mut self, stroke_options: StrokeOptions) -> Self {
         self.stroke_options = Some(stroke_options);
         self
     }
 
-    pub fn color(mut self, color: [f32; 4]) -> Self {
+    pub fn with_color(mut self, color: [f32; 4]) -> Self {
         self.color = color;
         self
     }
 
-    pub fn tolerance(mut self, tolerance: f32) -> Self {
+    pub fn with_tolerance(mut self, tolerance: f32) -> Self {
         self.tolerance = tolerance;
         self
     }
@@ -116,16 +116,16 @@ macro_rules! _options_forwarder {
 macro_rules! options_forwarder {
     (no_fill) => {
         _options_forwarder!{
-            color(color: [f32; 4]),
-            stroke(stroke_options: StrokeOptions),
-            tolerance(tolerance: f32),
+            with_color(color: [f32; 4]),
+            with_stroke(stroke_options: StrokeOptions),
+            with_tolerance(tolerance: f32),
         }
     };
     () => {
         options_forwarder!{no_fill}
 
-        pub fn fill(mut self) -> Self {
-            self.options = self.options.fill();
+        pub fn with_fill(mut self) -> Self {
+            self.options = self.options.with_fill();
             self
         }
     };
