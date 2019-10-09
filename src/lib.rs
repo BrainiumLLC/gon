@@ -13,7 +13,7 @@ pub use lyon_tessellation as tess;
 pub use options::StrokeOptions;
 pub use regular_poly::RegularPolyBuilder;
 pub use star::StarBuilder;
-pub use vertex::Vertex;
+pub use vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex};
 
 pub const DEFAULT_RADIUS: f32 = 50.0;
 pub const DEFAULT_START_ANGLE: gee::Angle<f32> = gee::Angle {
@@ -26,14 +26,20 @@ pub struct Poly {
     pub indices: Vec<u32>,
 }
 
-trait PolyBuilder {
+pub trait PolyBuilder {
     fn build_in_place(
         self,
         vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
     ) -> Result<(), tess::TessellationError>;
 }
 
-fn try_build<T: PolyBuilder>(builder: T) -> Result<Poly, tess::TessellationError> {
+impl<T: PolyBuilder> From<T> for Poly {
+    fn from(pb: T) -> Self {
+        build(pb)
+    }
+}
+
+pub fn try_build<T: PolyBuilder>(builder: T) -> Result<Poly, tess::TessellationError> {
     let mut output: tess::VertexBuffers<Vertex, u32> = tess::VertexBuffers::new();
     builder.build_in_place(&mut output)?;
     Ok(Poly {
@@ -42,7 +48,7 @@ fn try_build<T: PolyBuilder>(builder: T) -> Result<Poly, tess::TessellationError
     })
 }
 
-fn build<T: PolyBuilder>(builder: T) -> Poly {
+pub fn build<T: PolyBuilder>(builder: T) -> Poly {
     try_build(builder).expect("failed to build `Poly`")
 }
 

@@ -1,5 +1,4 @@
 use crate::tess;
-use chromatose::LinRgba;
 
 #[derive(Clone, Debug)]
 pub struct StrokeOptions {
@@ -39,7 +38,6 @@ impl StrokeOptions {
 
 #[derive(Clone, Debug)]
 pub struct Options {
-    pub color: LinRgba,
     pub stroke_options: Option<StrokeOptions>,
     pub tolerance: f32,
     _prevent_destructuring: (),
@@ -48,7 +46,6 @@ pub struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
-            color: LinRgba([1.0; 4]),
             stroke_options: None,
             tolerance: tess::FillOptions::DEFAULT_TOLERANCE,
             _prevent_destructuring: (),
@@ -68,11 +65,6 @@ impl Options {
 
     pub fn with_stroke(mut self, stroke_options: StrokeOptions) -> Self {
         self.stroke_options = Some(stroke_options);
-        self
-    }
-
-    pub fn with_color(mut self, color: LinRgba) -> Self {
-        self.color = color;
         self
     }
 
@@ -117,7 +109,6 @@ macro_rules! _options_forwarder {
 macro_rules! options_forwarder {
     (no_fill) => {
         _options_forwarder!{
-            with_color(color: chromatose::LinRgba),
             with_stroke(stroke_options: StrokeOptions),
             with_tolerance(tolerance: f32),
         }

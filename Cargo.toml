@@ -6,7 +6,6 @@ edition = "2018"
 license = "Brainium-Proprietary"
 
 [dependencies]
-chromatose = { git = "https://github.com/BrainiumLLC/chromatose" }
 gee = { git = "https://github.com/BrainiumLLC/gee" }
 itertools = "0.8.0"
 lyon_tessellation = "0.14.1"

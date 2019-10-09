@@ -60,7 +60,6 @@ impl PolyBuilder for LineSegmentBuilder {
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
                     StrokeVertexConstructor::new(
-                        self.options.color,
                         stroke_options.stroke_width,
                         stroke_options.texture_aspect_ratio,
                     ),

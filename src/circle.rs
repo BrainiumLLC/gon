@@ -55,7 +55,7 @@ impl PolyBuilder for CircleBuilder {
                 &self.options.fill_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
-                    FillVertexConstructor::new(self.options.color, self.circle.bounding_rect()),
+                    FillVertexConstructor::new(self.circle.bounding_rect()),
                 ),
             )?,
             Some(stroke_options) => tess::basic_shapes::stroke_circle(
@@ -65,7 +65,6 @@ impl PolyBuilder for CircleBuilder {
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
                     StrokeVertexConstructor::new(
-                        self.options.color,
                         stroke_options.stroke_width,
                         stroke_options.texture_aspect_ratio,
                     ),
