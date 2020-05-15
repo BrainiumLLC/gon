@@ -3,7 +3,7 @@ name = "pee"
 version = "0.1.0"
 authors = ["Brainium Studios LLC"]
 edition = "2018"
-license = "Brainium-Proprietary"
+license = "LicenseRef-Brainium-Proprietary"
 
 [dependencies]
 gee = { git = "https://github.com/BrainiumLLC/gee" }
