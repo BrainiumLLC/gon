@@ -8,6 +8,7 @@ mod star;
 mod vertex;
 
 pub use circle::CircleBuilder;
+pub use gee;
 pub use line_segment::LineSegmentBuilder;
 pub use lyon_tessellation as tess;
 pub use options::StrokeOptions;
@@ -16,9 +17,10 @@ pub use star::StarBuilder;
 pub use vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex};
 
 pub const DEFAULT_RADIUS: f32 = 50.0;
-pub const DEFAULT_START_ANGLE: gee::Angle<f32> = gee::Angle {
-    radians: -std::f32::consts::FRAC_PI_2,
-};
+
+pub fn default_start_angle() -> gee::Angle<f32> {
+    -gee::Angle::FRAC_PI_2()
+}
 
 #[derive(Clone, Debug)]
 pub struct Poly {

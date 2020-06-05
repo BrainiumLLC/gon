@@ -1,8 +1,9 @@
 use crate::{
+    default_start_angle,
     options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder, DEFAULT_RADIUS, DEFAULT_START_ANGLE,
+    Poly, PolyBuilder, DEFAULT_RADIUS,
 };
 use itertools::Itertools as _;
 
@@ -18,13 +19,10 @@ pub struct StarBuilder {
 impl Default for StarBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle {
-                radius: DEFAULT_RADIUS,
-                ..Default::default()
-            },
+            circle: gee::Circle::with_radius(DEFAULT_RADIUS),
             inner_radius_over_radius: 0.5,
             tips: 5,
-            start_angle: DEFAULT_START_ANGLE,
+            start_angle: default_start_angle(),
             options: Default::default(),
         }
     }
@@ -51,12 +49,12 @@ impl StarBuilder {
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
-        self.circle.center = center;
+        self.circle = self.circle.map_center(|_| center);
         self
     }
 
     pub fn with_radius(mut self, radius: f32) -> Self {
-        self.circle.radius = radius;
+        self.circle = self.circle.map_radius(|_| radius);
         self
     }
 
@@ -82,15 +80,11 @@ impl StarBuilder {
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         let top_angle = self.start_angle;
         let inner_offset = gee::Angle::PI() / self.tips as f32;
-        let inner_circle = {
-            let mut inner_circle = self.circle;
-            inner_circle.radius *= self.inner_radius_over_radius;
-            inner_circle
-        };
+        let inner_circle = self.circle.scaled_radius(self.inner_radius_over_radius);
         self.circle
             .circle_points(self.tips, top_angle)
             .interleave(inner_circle.circle_points(self.tips, top_angle + inner_offset))
-            .map(|p| crate::point(p))
+            .map(crate::point)
     }
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {

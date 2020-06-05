@@ -26,8 +26,8 @@ impl tess::VertexConstructor<tess::FillVertex, Vertex> for FillVertexConstructor
         let pos = gee::Point::new(vertex.position.x, vertex.position.y);
         let rel_coord = pos - self.top_left;
         let tex_coord = gee::Point::new(
-            rel_coord.dx / self.size.width,
-            rel_coord.dy / self.size.height,
+            rel_coord.dx / self.size.width(),
+            rel_coord.dy / self.size.height(),
         );
         Vertex { pos, tex_coord }
     }

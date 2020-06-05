@@ -14,21 +14,18 @@ pub struct CircleBuilder {
 impl CircleBuilder {
     pub fn new() -> Self {
         Self {
-            circle: gee::Circle {
-                radius: DEFAULT_RADIUS,
-                ..Default::default()
-            },
+            circle: gee::Circle::with_radius(DEFAULT_RADIUS),
             options: Default::default(),
         }
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
-        self.circle.center = center;
+        self.circle = self.circle.map_center(|_| center);
         self
     }
 
     pub fn with_radius(mut self, radius: f32) -> Self {
-        self.circle.radius = radius;
+        self.circle = self.circle.map_radius(|_| radius);
         self
     }
 
@@ -50,8 +47,8 @@ impl PolyBuilder for CircleBuilder {
     ) -> Result<(), tess::TessellationError> {
         let _count = match self.options.stroke_options.clone() {
             None => tess::basic_shapes::fill_circle(
-                crate::point(self.circle.center),
-                self.circle.radius,
+                crate::point(self.circle.center()),
+                self.circle.radius(),
                 &self.options.fill_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,
@@ -59,8 +56,8 @@ impl PolyBuilder for CircleBuilder {
                 ),
             )?,
             Some(stroke_options) => tess::basic_shapes::stroke_circle(
-                crate::point(self.circle.center),
-                self.circle.radius,
+                crate::point(self.circle.center()),
+                self.circle.radius(),
                 &self.options.stroke_options(),
                 &mut tess::BuffersBuilder::new(
                     vertex_buffers,

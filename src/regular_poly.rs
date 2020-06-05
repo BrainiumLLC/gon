@@ -1,8 +1,9 @@
 use crate::{
+    default_start_angle,
     options::{Options, StrokeOptions},
     tess,
     vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder, DEFAULT_RADIUS, DEFAULT_START_ANGLE,
+    Poly, PolyBuilder, DEFAULT_RADIUS,
 };
 
 #[derive(Clone, Debug)]
@@ -16,12 +17,9 @@ pub struct RegularPolyBuilder {
 impl Default for RegularPolyBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle {
-                radius: DEFAULT_RADIUS,
-                ..Default::default()
-            },
+            circle: gee::Circle::with_radius(DEFAULT_RADIUS),
             sides: 3,
-            start_angle: DEFAULT_START_ANGLE,
+            start_angle: default_start_angle(),
             options: Default::default(),
         }
     }
@@ -64,12 +62,12 @@ impl RegularPolyBuilder {
     }
 
     pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
-        self.circle.center = center;
+        self.circle = self.circle.map_center(|_| center);
         self
     }
 
     pub fn with_radius(mut self, radius: f32) -> Self {
-        self.circle.radius = radius;
+        self.circle = self.circle.map_radius(|_| radius);
         self
     }
 
@@ -83,7 +81,7 @@ impl RegularPolyBuilder {
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         self.circle
             .circle_points(self.sides, self.start_angle)
-            .map(|point| tess::math::point(point.x, point.y))
+            .map(crate::point)
     }
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
