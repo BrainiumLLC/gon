@@ -4,6 +4,7 @@ mod options;
 mod circle;
 mod line_segment;
 mod regular_poly;
+mod round_rect;
 mod star;
 mod vertex;
 
@@ -13,13 +14,14 @@ pub use line_segment::LineSegmentBuilder;
 pub use lyon_tessellation as tess;
 pub use options::StrokeOptions;
 pub use regular_poly::RegularPolyBuilder;
+pub use round_rect::RoundRectBuilder;
 pub use star::StarBuilder;
 pub use vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex};
 
 pub const DEFAULT_RADIUS: f32 = 50.0;
 
 pub fn default_start_angle() -> gee::Angle<f32> {
-    -gee::Angle::FRAC_PI_2()
+    gee::Direction::North.angle()
 }
 
 #[derive(Clone, Debug)]
