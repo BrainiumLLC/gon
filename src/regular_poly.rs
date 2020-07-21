@@ -69,6 +69,10 @@ impl RegularPolyBuilder {
         self
     }
 
+    pub fn with_center_and_radius(self, center: gee::Point<f32>, radius: f32) -> Self {
+        self.with_circle(gee::Circle::new(center, radius))
+    }
+
     pub fn with_rotation(mut self, start_angle: impl Into<gee::Angle<f32>>) -> Self {
         self.start_angle = start_angle.into();
         self
