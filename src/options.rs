@@ -18,8 +18,8 @@ impl Default for StrokeOptions {
 }
 
 impl StrokeOptions {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(stroke_width: f32) -> Self {
+        Self::default().with_stroke_width(stroke_width)
     }
 
     pub fn with_stroke_width(mut self, stroke_width: f32) -> Self {

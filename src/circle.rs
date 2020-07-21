@@ -13,10 +13,12 @@ pub struct CircleBuilder {
 
 impl CircleBuilder {
     pub fn new(circle: gee::Circle<f32>) -> Self {
-        Self {
-            circle,
-            ..Default::default()
-        }
+        Self::default().with_circle(circle)
+    }
+
+    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+        self.circle = circle;
+        self
     }
 
     options_forwarder! {}

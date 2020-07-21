@@ -31,9 +31,7 @@ impl Default for RoundRectBuilder {
 
 impl RoundRectBuilder {
     pub fn new(rect: gee::Rect<f32>) -> Self {
-        let mut this = Self::default();
-        this.rect = rect;
-        this
+        Self::default().with_rect(rect)
     }
 
     pub fn with_rect(mut self, rect: gee::Rect<f32>) -> Self {

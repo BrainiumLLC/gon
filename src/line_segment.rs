@@ -24,8 +24,8 @@ impl Default for LineSegmentBuilder {
 }
 
 impl LineSegmentBuilder {
-    pub fn new() -> Self {
-        Default::default()
+    pub fn new(line: gee::LineSegment<f32>) -> Self {
+        Self::default().with_line_segment(line)
     }
 
     pub fn with_line_segment(mut self, line: gee::LineSegment<f32>) -> Self {

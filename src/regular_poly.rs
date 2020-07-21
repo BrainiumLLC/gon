@@ -27,14 +27,7 @@ impl Default for RegularPolyBuilder {
 
 impl RegularPolyBuilder {
     pub fn new(sides: u32) -> Self {
-        assert!(
-            sides >= 3,
-            "`Poly`'s must have atleast 3 sides, but this one has {}",
-            sides
-        );
-        let mut result = Self::default();
-        result.sides = sides;
-        result
+        Self::default().with_sides(sides)
     }
 
     pub fn triangle() -> Self {
@@ -61,13 +54,18 @@ impl RegularPolyBuilder {
         Self::new(10)
     }
 
-    pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
-        self.circle = self.circle.map_center(|_| center);
+    pub fn with_sides(mut self, sides: u32) -> Self {
+        assert!(
+            sides >= 3,
+            "regular polygons must have at least 3 sides, but this one has {}",
+            sides
+        );
+        self.sides = sides;
         self
     }
 
-    pub fn with_radius(mut self, radius: f32) -> Self {
-        self.circle = self.circle.map_radius(|_| radius);
+    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+        self.circle = circle;
         self
     }
 

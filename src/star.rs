@@ -30,14 +30,7 @@ impl Default for StarBuilder {
 
 impl StarBuilder {
     pub fn new(tips: u32) -> Self {
-        assert!(
-            tips >= 3,
-            "`Star`'s must have atleast 3 tips, but this one has {}",
-            tips
-        );
-        let mut result = Self::default();
-        result.tips = tips;
-        result
+        Self::default().with_tips(tips)
     }
 
     pub fn pentagram() -> Self {
@@ -48,13 +41,18 @@ impl StarBuilder {
         Self::new(6)
     }
 
-    pub fn with_center(mut self, center: gee::Point<f32>) -> Self {
-        self.circle = self.circle.map_center(|_| center);
+    pub fn with_tips(mut self, tips: u32) -> Self {
+        assert!(
+            tips >= 3,
+            "stars must have at least 3 tips, but this one has {}",
+            tips
+        );
+        self.tips = tips;
         self
     }
 
-    pub fn with_radius(mut self, radius: f32) -> Self {
-        self.circle = self.circle.map_radius(|_| radius);
+    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+        self.circle = circle;
         self
     }
 
