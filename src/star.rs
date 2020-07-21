@@ -56,8 +56,8 @@ impl StarBuilder {
         self
     }
 
-    pub fn with_rotation(mut self, start_angle: gee::Angle<f32>) -> Self {
-        self.start_angle = start_angle;
+    pub fn with_rotation(mut self, start_angle: impl Into<gee::Angle<f32>>) -> Self {
+        self.start_angle = start_angle.into();
         self
     }
 
