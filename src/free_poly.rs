@@ -22,6 +22,10 @@ impl FreePolyBuilder {
         Self::default().with_points(points)
     }
 
+    pub fn from_line_segments(lines: impl IntoIterator<Item = gee::LineSegment<f32>>) -> Self {
+        Self::default().with_line_segments(lines)
+    }
+
     pub fn with_point(mut self, point: gee::Point<f32>) -> Self {
         self.points.push(point);
         self.bounding_box = self
@@ -41,6 +45,17 @@ impl FreePolyBuilder {
         points
             .into_iter()
             .fold(self, |this, point| this.with_point(point))
+    }
+
+    pub fn with_line_segment(self, line: gee::LineSegment<f32>) -> Self {
+        self.with_points(line.points())
+    }
+
+    pub fn with_line_segments(
+        self,
+        lines: impl IntoIterator<Item = gee::LineSegment<f32>>,
+    ) -> Self {
+        self.with_points(lines.into_iter().flat_map(|line| line.points()))
     }
 
     pub fn with_stroke(mut self, stroke_width: f32, open: bool) -> Self {
