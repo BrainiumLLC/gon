@@ -49,7 +49,9 @@ impl RoundRectBuilder {
         self
     }
 
-    options_forwarder! {}
+    stroke!(public);
+
+    fill!();
 
     fn points(&self) -> Vec<tess::math::Point> {
         let steps = (self.steps_per_radius * self.radius).round() as u32;

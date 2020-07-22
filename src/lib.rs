@@ -2,6 +2,7 @@
 mod options;
 
 mod circle;
+mod free_poly;
 mod line_segment;
 mod regular_poly;
 mod round_rect;
@@ -9,6 +10,7 @@ mod star;
 mod vertex;
 
 pub use circle::CircleBuilder;
+pub use free_poly::FreePolyBuilder;
 pub use gee;
 pub use line_segment::LineSegmentBuilder;
 pub use lyon_tessellation as tess;

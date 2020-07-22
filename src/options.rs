@@ -63,7 +63,15 @@ impl Options {
         self
     }
 
-    pub fn with_stroke(mut self, stroke_options: StrokeOptions) -> Self {
+    pub fn with_stroke(mut self, stroke_width: f32) -> Self {
+        self.stroke_options = self
+            .stroke_options
+            .map(|stroke_options| stroke_options.with_stroke_width(stroke_width))
+            .or_else(|| Some(StrokeOptions::new(stroke_width)));
+        self
+    }
+
+    pub fn with_stroke_opts(mut self, stroke_options: StrokeOptions) -> Self {
         self.stroke_options = Some(stroke_options);
         self
     }
@@ -106,16 +114,34 @@ macro_rules! _options_forwarder {
     };
 }
 
-macro_rules! options_forwarder {
-    (no_fill) => {
-        _options_forwarder!{
-            with_stroke(stroke_options: StrokeOptions),
+macro_rules! stroke {
+    (public) => {
+        _options_forwarder! {
+            with_stroke(stroke_width: f32),
+            with_stroke_opts(stroke_options: StrokeOptions),
             with_tolerance(tolerance: f32),
         }
     };
-    () => {
-        options_forwarder!{no_fill}
 
+    (private) => {
+        fn _with_stroke(mut self, stroke_width: f32) -> Self {
+            self.options = self.options.with_stroke(stroke_width);
+            self
+        }
+
+        fn _with_stroke_opts(mut self, stroke_options: StrokeOptions) -> Self {
+            self.options = self.options.with_stroke_opts(stroke_options);
+            self
+        }
+
+        _options_forwarder! {
+            with_tolerance(tolerance: f32),
+        }
+    };
+}
+
+macro_rules! fill {
+    () => {
         pub fn with_fill(mut self) -> Self {
             self.options = self.options.with_fill();
             self

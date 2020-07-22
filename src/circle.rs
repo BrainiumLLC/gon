@@ -21,7 +21,9 @@ impl CircleBuilder {
         self
     }
 
-    options_forwarder! {}
+    stroke!(public);
+
+    fill!();
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
         crate::try_build(self)

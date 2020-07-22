@@ -77,7 +77,9 @@ impl StarBuilder {
         self
     }
 
-    options_forwarder! {}
+    stroke!(public);
+
+    fill!();
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         let top_angle = self.start_angle;

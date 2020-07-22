@@ -33,7 +33,7 @@ impl LineSegmentBuilder {
         self
     }
 
-    options_forwarder! {no_fill}
+    stroke!(public);
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
         crate::try_build(self)

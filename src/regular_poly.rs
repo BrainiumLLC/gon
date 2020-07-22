@@ -34,7 +34,7 @@ impl RegularPolyBuilder {
         Self::new(3)
     }
 
-    pub fn quadrilateral() -> Self {
+    pub fn square() -> Self {
         Self::new(4)
     }
 
@@ -78,7 +78,9 @@ impl RegularPolyBuilder {
         self
     }
 
-    options_forwarder! {}
+    stroke!(public);
+
+    fill!();
 
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         self.circle
