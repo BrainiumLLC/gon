@@ -14,80 +14,12 @@ pub struct FreePolyBuilder {
 }
 
 impl FreePolyBuilder {
-    pub fn fill() -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
 
-    pub fn stroke(stroke_width: f32, open: bool) -> Self {
-        Self::default().with_stroke(stroke_width, open)
-    }
-
-    pub fn stroke_open(stroke_width: f32) -> Self {
-        Self::default().with_stroke_open(stroke_width)
-    }
-
-    pub fn stroke_closed(stroke_width: f32) -> Self {
-        Self::default().with_stroke_closed(stroke_width)
-    }
-
-    pub fn stroke_opts(stroke_options: StrokeOptions, open: bool) -> Self {
-        Self::default().with_stroke_opts(stroke_options, open)
-    }
-
-    pub fn stroke_opts_open(stroke_options: StrokeOptions) -> Self {
-        Self::default().with_stroke_opts_open(stroke_options)
-    }
-
-    pub fn stroke_opts_closed(stroke_options: StrokeOptions) -> Self {
-        Self::default().with_stroke_opts_closed(stroke_options)
-    }
-
-    pub fn fill_from_points(points: impl IntoIterator<Item = gee::Point<f32>>) -> Self {
+    pub fn from_points(points: impl IntoIterator<Item = gee::Point<f32>>) -> Self {
         Self::default().with_points(points)
-    }
-
-    pub fn stroke_from_points(
-        stroke_width: f32,
-        open: bool,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke(stroke_width, open).with_points(points)
-    }
-
-    pub fn stroke_open_from_points(
-        stroke_width: f32,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke_open(stroke_width).with_points(points)
-    }
-
-    pub fn stroke_closed_from_points(
-        stroke_width: f32,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke_closed(stroke_width).with_points(points)
-    }
-
-    pub fn stroke_opts_from_points(
-        stroke_options: StrokeOptions,
-        open: bool,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke_opts(stroke_options, open).with_points(points)
-    }
-
-    pub fn stroke_opts_open_from_points(
-        stroke_options: StrokeOptions,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke_opts_open(stroke_options).with_points(points)
-    }
-
-    pub fn stroke_opts_closed_from_points(
-        stroke_options: StrokeOptions,
-        points: impl IntoIterator<Item = gee::Point<f32>>,
-    ) -> Self {
-        Self::stroke_opts_closed(stroke_options).with_points(points)
     }
 
     pub fn with_point(mut self, point: gee::Point<f32>) -> Self {
