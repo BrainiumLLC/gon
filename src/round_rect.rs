@@ -18,7 +18,7 @@ pub struct RoundRectBuilder {
 impl Default for RoundRectBuilder {
     fn default() -> Self {
         Self {
-            rect: gee::Rect::with_bottom_left(
+            rect: gee::Rect::from_bottom_left(
                 gee::Point::zero(),
                 gee::Size::square(DEFAULT_RADIUS * 3.0),
             ),
@@ -56,7 +56,7 @@ impl RoundRectBuilder {
     fn points(&self) -> Vec<tess::math::Point> {
         let steps = (self.steps_per_radius * self.radius).round() as u32;
         self.rect
-            .inset_all(self.radius)
+            .inset_uniform(self.radius)
             .clockwise_points()
             .rev()
             .zip(

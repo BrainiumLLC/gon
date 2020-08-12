@@ -19,7 +19,7 @@ pub struct StarBuilder {
 impl Default for StarBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle::with_radius(DEFAULT_RADIUS),
+            circle: gee::Circle::from_radius(DEFAULT_RADIUS),
             inner_radius_over_radius: 0.5,
             tips: 5,
             start_angle: default_start_angle(),
@@ -84,7 +84,7 @@ impl StarBuilder {
     fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
         let top_angle = self.start_angle;
         let inner_offset = gee::Angle::PI() / self.tips as f32;
-        let inner_circle = self.circle.scaled_radius(self.inner_radius_over_radius);
+        let inner_circle = self.circle.scale_radius(self.inner_radius_over_radius);
         self.circle
             .circle_points(self.tips, top_angle)
             .interleave(inner_circle.circle_points(self.tips, top_angle + inner_offset))

@@ -17,7 +17,7 @@ pub struct RegularPolyBuilder {
 impl Default for RegularPolyBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle::with_radius(DEFAULT_RADIUS),
+            circle: gee::Circle::from_radius(DEFAULT_RADIUS),
             sides: 3,
             start_angle: default_start_angle(),
             options: Default::default(),
