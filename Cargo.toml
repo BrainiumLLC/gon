@@ -5,6 +5,9 @@ authors = ["Brainium Studios LLC"]
 edition = "2018"
 license = "LicenseRef-Brainium-Proprietary"
 
+[features]
+serde = ["gee/serde"]
+
 [dependencies]
 gee = { git = "https://github.com/BrainiumLLC/gee" }
 itertools = "0.9.0"
