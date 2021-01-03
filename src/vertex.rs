@@ -4,19 +4,20 @@ use crate::tess;
 pub struct Vertex {
     pub pos: gee::Point<f32>,
     pub tex_coord: gee::Point<f32>,
+    pub normal: gee::Vector<f32>,
 }
 
 pub struct FillVertexConstructor {
     // cached version of gee::Rect in the format we want
     pub top_left: gee::Point<f32>,
-    pub size: gee::Size<f32>,
+    pub scale: gee::Vector<f32>,
 }
 
 impl FillVertexConstructor {
     pub fn new(bounding_box: gee::Rect<f32>) -> Self {
         Self {
             top_left: bounding_box.top_left(),
-            size: bounding_box.size(),
+            scale: bounding_box.size().to_vector().map(|x| x.recip()),
         }
     }
 }
@@ -25,11 +26,13 @@ impl tess::VertexConstructor<tess::FillVertex, Vertex> for FillVertexConstructor
     fn new_vertex(&mut self, vertex: tess::FillVertex) -> Vertex {
         let pos = gee::Point::new(vertex.position.x, vertex.position.y);
         let rel_coord = pos - self.top_left;
-        let tex_coord = gee::Point::new(
-            rel_coord.dx / self.size.width(),
-            rel_coord.dy / self.size.height(),
-        );
-        Vertex { pos, tex_coord }
+        let tex_coord = gee::Point::new(rel_coord.dx * self.scale.dx, rel_coord.dy * self.scale.dy);
+        let normal = gee::Vector::new(vertex.normal.x, vertex.normal.y);
+        Vertex {
+            pos,
+            tex_coord,
+            normal,
+        }
     }
 }
 
@@ -56,6 +59,11 @@ impl tess::VertexConstructor<tess::StrokeVertex, Vertex> for StrokeVertexConstru
         };
         let y = vertex.advancement / self.stroke_width * self.texture_aspect_ratio;
         let tex_coord = gee::Point::new(x, y);
-        Vertex { pos, tex_coord }
+        let normal = gee::Vector::new(vertex.normal.x, vertex.normal.y);
+        Vertex {
+            pos,
+            tex_coord,
+            normal,
+        }
     }
 }
