@@ -55,25 +55,33 @@ impl RoundRectBuilder {
 
     fn points(&self) -> Vec<tess::math::Point> {
         let steps = (self.steps_per_radius * self.radius).round() as u32;
-        self.rect
-            .inset_uniform(self.radius)
-            .clockwise_points()
-            .rev()
-            .zip(
-                std::iter::once(gee::Cardinal::West.angle())
-                    .chain(std::iter::once(gee::Cardinal::South.angle()))
-                    .chain(std::iter::once(gee::Cardinal::East.angle()))
-                    .chain(std::iter::once(gee::Cardinal::North.angle())),
-            )
-            .flat_map(|(center, start_angle)| {
-                gee::Circle::new(center, self.radius).arc_points(
-                    steps,
-                    start_angle,
-                    start_angle + gee::Angle::FRAC_PI_2(),
+        if self.radius > 0.0 {
+            self.rect
+                .inset_uniform(self.radius)
+                .clockwise_points()
+                .rev()
+                .zip(
+                    std::iter::once(gee::Cardinal::West.angle())
+                        .chain(std::iter::once(gee::Cardinal::South.angle()))
+                        .chain(std::iter::once(gee::Cardinal::East.angle()))
+                        .chain(std::iter::once(gee::Cardinal::North.angle())),
                 )
-            })
-            .map(crate::point)
-            .collect()
+                .flat_map(|(center, start_angle)| {
+                    gee::Circle::new(center, self.radius).arc_points(
+                        steps,
+                        start_angle,
+                        start_angle + gee::Angle::FRAC_PI_2(),
+                    )
+                })
+                .map(crate::point)
+                .collect()
+        } else {
+            self.rect
+                .clockwise_points()
+                .rev()
+                .map(crate::point)
+                .collect()
+        }
     }
 
     pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
