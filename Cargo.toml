@@ -3,7 +3,12 @@ name = "pee"
 version = "0.1.0"
 authors = ["Brainium Studios LLC"]
 edition = "2018"
-license = "LicenseRef-Brainium-Proprietary"
+documentation = "https://docs.rs/pee"
+repository = "https://github.com/BrainiumLLC/pee"
+readme = "README.md"
+keywords = ["geometry", "math", "mathematics"]
+categories = ["graphics"]
+license = "Apache-2.0/MIT"
 
 [features]
 serde = ["gee/serde"]
