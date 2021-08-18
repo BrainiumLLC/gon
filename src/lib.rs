@@ -9,16 +9,17 @@ mod round_rect;
 mod star;
 mod vertex;
 
-pub use circle::CircleBuilder;
-pub use free_poly::FreePolyBuilder;
-pub use gee;
-pub use line_segment::LineSegmentBuilder;
+pub use self::{
+    circle::CircleBuilder,
+    free_poly::FreePolyBuilder,
+    line_segment::LineSegmentBuilder,
+    options::StrokeOptions,
+    regular_poly::RegularPolyBuilder,
+    round_rect::RoundRectBuilder,
+    star::StarBuilder,
+    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
+};
 pub use lyon_tessellation as tess;
-pub use options::StrokeOptions;
-pub use regular_poly::RegularPolyBuilder;
-pub use round_rect::RoundRectBuilder;
-pub use star::StarBuilder;
-pub use vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex};
 
 pub const DEFAULT_RADIUS: f32 = 50.0;
 
