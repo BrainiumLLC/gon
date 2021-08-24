@@ -1,71 +1,52 @@
 use crate::{
     options::{Options, StrokeOptions},
-    tess,
-    vertex::{StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder, DEFAULT_RADIUS,
+    tess, PolyBuilder, DEFAULT_RADIUS,
 };
+use gee::{LineSegment, Point, Rect};
 
 #[derive(Clone, Debug)]
 pub struct LineSegmentBuilder {
-    pub line: gee::LineSegment<f32>,
+    pub line: LineSegment,
     pub options: Options,
 }
 
 impl Default for LineSegmentBuilder {
     fn default() -> Self {
         Self {
-            line: gee::LineSegment::new(
-                gee::Point::new(0.0, 0.0),
-                gee::Point::new(DEFAULT_RADIUS * 2.0, 0.0),
-            ),
+            line: LineSegment::new(Point::new(0.0, 0.0), Point::new(DEFAULT_RADIUS * 2.0, 0.0)),
             options: Options::default().with_stroke(Default::default()),
         }
     }
 }
 
 impl LineSegmentBuilder {
-    pub fn new(line: gee::LineSegment<f32>) -> Self {
+    pub fn new(line: LineSegment) -> Self {
         Self::default().with_line_segment(line)
     }
 
-    pub fn with_line_segment(mut self, line: gee::LineSegment<f32>) -> Self {
+    pub fn with_line_segment(mut self, line: LineSegment) -> Self {
         self.line = line;
         self
     }
 
     stroke!(public);
 
-    pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
-        crate::try_build(self)
-    }
-
-    pub fn build(self) -> Poly {
-        crate::build(self)
-    }
+    build!();
 }
 
 impl PolyBuilder for LineSegmentBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.stroke_options.clone() {
-            None => panic!("cannot Tessellate a Line using `Fill`"),
-            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
-                [crate::point(self.line.from), crate::point(self.line.to)]
-                    .iter()
-                    .cloned(),
-                true, // closed
-                &self.options.stroke_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    StrokeVertexConstructor::new(
-                        stroke_options.stroke_width,
-                        stroke_options.texture_aspect_ratio,
-                    ),
-                ),
-            )?,
-        };
-        Ok(())
+    fn options(&self) -> &Options {
+        &self.options
+    }
+
+    fn bounding_rect(&self) -> Rect {
+        todo!("line segments can't be filled")
+    }
+
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B) {
+        builder.add_line_segment(&tess::geom::LineSegment {
+            from: self.line.from.into(),
+            to: self.line.to.into(),
+        });
     }
 }

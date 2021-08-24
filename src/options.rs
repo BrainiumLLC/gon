@@ -1,10 +1,10 @@
 use crate::tess;
 
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct StrokeOptions {
     pub texture_aspect_ratio: f32,
     pub stroke_width: f32,
-    _prevent_destructuring: (),
 }
 
 impl Default for StrokeOptions {
@@ -12,7 +12,6 @@ impl Default for StrokeOptions {
         Self {
             texture_aspect_ratio: 1.0,
             stroke_width: 1.0,
-            _prevent_destructuring: (),
         }
     }
 }
@@ -37,10 +36,10 @@ impl StrokeOptions {
 }
 
 #[derive(Clone, Debug)]
+#[non_exhaustive]
 pub struct Options {
     pub stroke_options: Option<StrokeOptions>,
     pub tolerance: f32,
-    _prevent_destructuring: (),
 }
 
 impl Default for Options {
@@ -48,14 +47,13 @@ impl Default for Options {
         Self {
             stroke_options: None,
             tolerance: tess::FillOptions::DEFAULT_TOLERANCE,
-            _prevent_destructuring: (),
         }
     }
 }
 
 impl Options {
     pub fn new() -> Self {
-        Default::default()
+        Self::default()
     }
 
     pub fn with_fill(mut self) -> Self {
@@ -83,17 +81,13 @@ impl Options {
 
     pub(crate) fn fill_options(&self) -> tess::FillOptions {
         assert!(self.stroke_options.is_none());
-        tess::FillOptions::default()
-            .with_normals(false)
-            .with_tolerance(self.tolerance)
-            .assume_no_intersections()
+        tess::FillOptions::default().with_tolerance(self.tolerance)
     }
 
     pub(crate) fn stroke_options(&self) -> tess::StrokeOptions {
         let StrokeOptions {
             stroke_width,
             texture_aspect_ratio: _,
-            _prevent_destructuring,
         } = self.stroke_options.clone().unwrap();
         tess::StrokeOptions::default()
             .with_tolerance(self.tolerance)

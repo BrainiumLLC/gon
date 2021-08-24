@@ -1,23 +1,22 @@
 use crate::{
     default_start_angle,
     options::{Options, StrokeOptions},
-    tess,
-    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder, DEFAULT_RADIUS,
+    tess, FreePolyBuilder, PolyBuilder, DEFAULT_RADIUS,
 };
+use gee::{Angle, Circle, Point, Rect};
 
 #[derive(Clone, Debug)]
 pub struct RegularPolyBuilder {
-    circle: gee::Circle<f32>,
+    circle: Circle,
     sides: u32,
-    start_angle: gee::Angle<f32>,
+    start_angle: Angle,
     options: Options,
 }
 
 impl Default for RegularPolyBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle::from_radius(DEFAULT_RADIUS),
+            circle: Circle::from_radius(DEFAULT_RADIUS),
             sides: 3,
             start_angle: default_start_angle(),
             options: Default::default(),
@@ -64,16 +63,16 @@ impl RegularPolyBuilder {
         self
     }
 
-    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+    pub fn with_circle(mut self, circle: Circle) -> Self {
         self.circle = circle;
         self
     }
 
-    pub fn with_center_and_radius(self, center: gee::Point<f32>, radius: f32) -> Self {
-        self.with_circle(gee::Circle::new(center, radius))
+    pub fn with_center_and_radius(self, center: Point, radius: f32) -> Self {
+        self.with_circle(Circle::new(center, radius))
     }
 
-    pub fn with_rotation(mut self, start_angle: impl Into<gee::Angle<f32>>) -> Self {
+    pub fn with_rotation(mut self, start_angle: impl Into<Angle>) -> Self {
         self.start_angle = start_angle.into();
         self
     }
@@ -82,48 +81,27 @@ impl RegularPolyBuilder {
 
     fill!();
 
-    fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
-        self.circle
-            .circle_points(self.sides, self.start_angle)
-            .map(crate::point)
-    }
-
-    pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
-        crate::try_build(self)
-    }
-
-    pub fn build(self) -> Poly {
-        crate::build(self)
-    }
+    build!();
 }
 
 impl PolyBuilder for RegularPolyBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.stroke_options.clone() {
-            None => tess::basic_shapes::fill_convex_polyline(
-                self.points(),
-                &self.options.fill_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    FillVertexConstructor::new(self.circle.bounding_rect()),
-                ),
-            )?,
-            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
-                self.points(),
-                true, // closed
-                &self.options.stroke_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    StrokeVertexConstructor::new(
-                        stroke_options.stroke_width,
-                        stroke_options.texture_aspect_ratio,
-                    ),
-                ),
-            )?,
-        };
-        Ok(())
+    fn options(&self) -> &Options {
+        &self.options
+    }
+
+    fn bounding_rect(&self) -> Rect {
+        self.circle.bounding_rect()
+    }
+
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B) {
+        PolyBuilder::build(
+            FreePolyBuilder::from_parts(
+                self.circle.circle_points(self.sides, self.start_angle),
+                true,
+                Some(self.bounding_rect()),
+                self.options,
+            ),
+            builder,
+        );
     }
 }

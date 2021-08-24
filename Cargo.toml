@@ -14,6 +14,7 @@ license = "Apache-2.0/MIT"
 serde = ["gee/serde"]
 
 [dependencies]
-gee = { git = "https://github.com/BrainiumLLC/gee" }
+gee = { git = "https://github.com/BrainiumLLC/gee", features = ["euclid"] }
 itertools = "0.10.1"
-lyon_tessellation = "0.14.1"
+lyon_tessellation = "0.17.8"
+thiserror = "1.0.26"

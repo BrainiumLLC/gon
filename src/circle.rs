@@ -1,22 +1,21 @@
 use crate::{
     options::{Options, StrokeOptions},
-    tess,
-    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    tess, PolyBuilder,
 };
+use gee::{Circle, Rect};
 
 #[derive(Clone, Debug, Default)]
 pub struct CircleBuilder {
-    pub circle: gee::Circle<f32>,
+    pub circle: Circle,
     pub options: Options,
 }
 
 impl CircleBuilder {
-    pub fn new(circle: gee::Circle<f32>) -> Self {
+    pub fn new(circle: Circle) -> Self {
         Self::default().with_circle(circle)
     }
 
-    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+    pub fn with_circle(mut self, circle: Circle) -> Self {
         self.circle = circle;
         self
     }
@@ -25,43 +24,23 @@ impl CircleBuilder {
 
     fill!();
 
-    pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
-        crate::try_build(self)
-    }
-
-    pub fn build(self) -> Poly {
-        crate::build(self)
-    }
+    build!();
 }
 
 impl PolyBuilder for CircleBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.stroke_options.clone() {
-            None => tess::basic_shapes::fill_circle(
-                crate::point(self.circle.center()),
-                self.circle.radius(),
-                &self.options.fill_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    FillVertexConstructor::new(self.circle.bounding_rect()),
-                ),
-            )?,
-            Some(stroke_options) => tess::basic_shapes::stroke_circle(
-                crate::point(self.circle.center()),
-                self.circle.radius(),
-                &self.options.stroke_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    StrokeVertexConstructor::new(
-                        stroke_options.stroke_width,
-                        stroke_options.texture_aspect_ratio,
-                    ),
-                ),
-            )?,
-        };
-        Ok(())
+    fn options(&self) -> &Options {
+        &self.options
+    }
+
+    fn bounding_rect(&self) -> Rect {
+        self.circle.bounding_rect()
+    }
+
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B) {
+        builder.add_circle(
+            self.circle.center().into(),
+            self.circle.radius(),
+            tess::path::Winding::Positive,
+        );
     }
 }

@@ -1,25 +1,24 @@
 use crate::{
     default_start_angle,
     options::{Options, StrokeOptions},
-    tess,
-    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder, DEFAULT_RADIUS,
+    tess, FreePolyBuilder, PolyBuilder, DEFAULT_RADIUS,
 };
+use gee::{Angle, Circle, Point, Rect};
 use itertools::Itertools as _;
 
 #[derive(Clone, Debug)]
 pub struct StarBuilder {
-    circle: gee::Circle<f32>,
+    circle: Circle,
     inner_radius_over_radius: f32,
     tips: u32,
-    start_angle: gee::Angle<f32>,
+    start_angle: Angle,
     options: Options,
 }
 
 impl Default for StarBuilder {
     fn default() -> Self {
         Self {
-            circle: gee::Circle::from_radius(DEFAULT_RADIUS),
+            circle: Circle::from_radius(DEFAULT_RADIUS),
             inner_radius_over_radius: 0.5,
             tips: 5,
             start_angle: default_start_angle(),
@@ -51,16 +50,16 @@ impl StarBuilder {
         self
     }
 
-    pub fn with_circle(mut self, circle: gee::Circle<f32>) -> Self {
+    pub fn with_circle(mut self, circle: Circle) -> Self {
         self.circle = circle;
         self
     }
 
-    pub fn with_center_and_radius(self, center: gee::Point<f32>, radius: f32) -> Self {
-        self.with_circle(gee::Circle::new(center, radius))
+    pub fn with_center_and_radius(self, center: Point, radius: f32) -> Self {
+        self.with_circle(Circle::new(center, radius))
     }
 
-    pub fn with_rotation(mut self, start_angle: impl Into<gee::Angle<f32>>) -> Self {
+    pub fn with_rotation(mut self, start_angle: impl Into<Angle>) -> Self {
         self.start_angle = start_angle.into();
         self
     }
@@ -81,52 +80,34 @@ impl StarBuilder {
 
     fill!();
 
-    fn points(&self) -> impl Iterator<Item = tess::math::Point> + Clone {
-        let top_angle = self.start_angle;
-        let inner_offset = gee::Angle::PI() / self.tips as f32;
-        let inner_circle = self.circle.scale_radius(self.inner_radius_over_radius);
-        self.circle
-            .circle_points(self.tips, top_angle)
-            .interleave(inner_circle.circle_points(self.tips, top_angle + inner_offset))
-            .map(crate::point)
-    }
-
-    pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
-        crate::try_build(self)
-    }
-
-    pub fn build(self) -> Poly {
-        crate::build(self)
-    }
+    build!();
 }
 
 impl PolyBuilder for StarBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.stroke_options.clone() {
-            None => tess::basic_shapes::fill_convex_polyline(
-                self.points(),
-                &self.options.fill_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    FillVertexConstructor::new(self.circle.bounding_rect()),
-                ),
-            )?,
-            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
-                self.points(),
-                true, // closed
-                &self.options.stroke_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    StrokeVertexConstructor::new(
-                        stroke_options.stroke_width,
-                        stroke_options.texture_aspect_ratio,
-                    ),
-                ),
-            )?,
-        };
-        Ok(())
+    fn options(&self) -> &Options {
+        &self.options
+    }
+
+    fn bounding_rect(&self) -> Rect {
+        self.circle.bounding_rect()
+    }
+
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B) {
+        PolyBuilder::build(
+            FreePolyBuilder::from_parts(
+                {
+                    let top_angle = self.start_angle;
+                    let inner_offset = gee::Angle::PI() / self.tips as f32;
+                    let inner_circle = self.circle.scale_radius(self.inner_radius_over_radius);
+                    self.circle
+                        .circle_points(self.tips, top_angle)
+                        .interleave(inner_circle.circle_points(self.tips, top_angle + inner_offset))
+                },
+                true,
+                Some(self.bounding_rect()),
+                self.options,
+            ),
+            builder,
+        );
     }
 }

@@ -1,6 +1,18 @@
 #[macro_use]
 mod options;
 
+macro_rules! build {
+    () => {
+        pub fn try_build(self) -> Result<$crate::Poly, $crate::Error> {
+            $crate::Poly::try_from_builder(self)
+        }
+
+        pub fn build(self) -> $crate::Poly {
+            $crate::Poly::from_builder(self)
+        }
+    };
+}
+
 mod circle;
 mod free_poly;
 mod line_segment;
@@ -10,55 +22,87 @@ mod star;
 mod vertex;
 
 pub use self::{
-    circle::CircleBuilder,
-    free_poly::FreePolyBuilder,
-    line_segment::LineSegmentBuilder,
-    options::StrokeOptions,
-    regular_poly::RegularPolyBuilder,
-    round_rect::RoundRectBuilder,
-    star::StarBuilder,
-    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
+    circle::CircleBuilder, free_poly::FreePolyBuilder, line_segment::LineSegmentBuilder,
+    options::StrokeOptions, regular_poly::RegularPolyBuilder, round_rect::RoundRectBuilder,
+    star::StarBuilder, vertex::Vertex,
 };
-pub use lyon_tessellation as tess;
+use self::{
+    options::Options,
+    vertex::{FillVertexConstructor, StrokeVertexConstructor},
+};
+use gee::{Angle, Direction, Rect};
+use lyon_tessellation as tess;
+use tess::path::traits::Build as _;
+use thiserror::Error;
 
 pub const DEFAULT_RADIUS: f32 = 50.0;
 
-pub fn default_start_angle() -> gee::Angle<f32> {
-    gee::Direction::North.angle()
+pub fn default_start_angle() -> Angle {
+    Direction::North.angle()
 }
 
+// TODO: lyon's error type doesn't impl `Display`/`Error`
+#[derive(Debug, Error)]
+#[error("Tesselation failed: {0:?}")]
+pub struct Error(tess::TessellationError);
+
+impl From<tess::TessellationError> for Error {
+    fn from(err: tess::TessellationError) -> Self {
+        Self(err)
+    }
+}
+
+/// Tesselated polygon vertices.
 #[derive(Clone, Debug)]
 pub struct Poly {
     pub vertices: Vec<Vertex>,
     pub indices: Vec<u32>,
 }
 
-pub trait PolyBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError>;
-}
+impl Poly {
+    fn try_from_builder<T: PolyBuilder>(poly: T) -> Result<Self, Error> {
+        let mut buf = tess::VertexBuffers::new();
+        let options = poly.options();
+        let _count = match options
+            .stroke_options
+            .clone()
+            .map(StrokeVertexConstructor::new)
+        {
+            None => {
+                let mut tessellator = tess::FillTessellator::new();
+                let fill_options = options.fill_options();
+                let mut buf_builder = tess::BuffersBuilder::new(
+                    &mut buf,
+                    FillVertexConstructor::new(poly.bounding_rect()),
+                );
+                let mut builder = tessellator.builder(&fill_options, &mut buf_builder);
+                poly.build(&mut builder);
+                builder.build()?;
+            }
+            Some(vertex_constructor) => {
+                let mut tessellator = tess::StrokeTessellator::new();
+                let stroke_options = options.stroke_options();
+                let mut buf_builder = tess::BuffersBuilder::new(&mut buf, vertex_constructor);
+                let mut builder = tessellator.builder(&stroke_options, &mut buf_builder);
+                poly.build(&mut builder);
+                builder.build()?;
+            }
+        };
+        Ok(Self {
+            vertices: buf.vertices,
+            indices: buf.indices,
+        })
+    }
 
-impl<T: PolyBuilder> From<T> for Poly {
-    fn from(pb: T) -> Self {
-        build(pb)
+    fn from_builder<T: PolyBuilder>(builder: T) -> Poly {
+        Self::try_from_builder(builder).expect("failed to build `Poly`")
     }
 }
 
-pub fn try_build<T: PolyBuilder>(builder: T) -> Result<Poly, tess::TessellationError> {
-    let mut output: tess::VertexBuffers<Vertex, u32> = tess::VertexBuffers::new();
-    builder.build_in_place(&mut output)?;
-    Ok(Poly {
-        vertices: output.vertices,
-        indices: output.indices,
-    })
-}
+trait PolyBuilder {
+    fn options(&self) -> &Options;
 
-pub fn build<T: PolyBuilder>(builder: T) -> Poly {
-    try_build(builder).expect("failed to build `Poly`")
-}
+    fn bounding_rect(&self) -> Rect;
 
-fn point(gee: gee::Point<f32>) -> tess::math::Point {
-    tess::math::point(gee.x, gee.y)
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B);
 }

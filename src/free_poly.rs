@@ -1,15 +1,14 @@
 use crate::{
     options::{Options, StrokeOptions},
-    tess,
-    vertex::{FillVertexConstructor, StrokeVertexConstructor, Vertex},
-    Poly, PolyBuilder,
+    tess, PolyBuilder,
 };
+use gee::{LineSegment, Point, Rect};
 
 #[derive(Clone, Debug, Default)]
 pub struct FreePolyBuilder {
-    points: Vec<gee::Point<f32>>,
+    points: Vec<tess::geom::Point<f32>>,
     open: bool,
-    bounding_box: Option<gee::Rect<f32>>,
+    bounding_rect: Option<Rect>,
     options: Options,
 }
 
@@ -18,22 +17,39 @@ impl FreePolyBuilder {
         Self::default()
     }
 
-    pub fn from_points(points: impl IntoIterator<Item = gee::Point<f32>>) -> Self {
-        Self::default().with_points(points)
+    pub(crate) fn from_parts(
+        points: impl IntoIterator<Item = Point>,
+        open: bool,
+        bounding_rect: Option<Rect>,
+        options: Options,
+    ) -> Self {
+        Self {
+            open,
+            bounding_rect,
+            options,
+            ..Self::from_points(points)
+        }
     }
 
-    pub fn from_line_segments(lines: impl IntoIterator<Item = gee::LineSegment<f32>>) -> Self {
+    pub fn from_points(points: impl IntoIterator<Item = Point>) -> Self {
+        Self::default().with_points(points.into_iter().map(Into::into))
+    }
+
+    pub fn from_line_segments(lines: impl IntoIterator<Item = LineSegment>) -> Self {
         Self::default().with_line_segments(lines)
     }
 
-    pub fn with_point(mut self, point: gee::Point<f32>) -> Self {
-        self.points.push(point);
-        self.bounding_box = self
-            .bounding_box
-            .map(|bounding_box| bounding_box.grow_to(point))
+    pub fn with_point(mut self, point: Point) -> Self {
+        self.points.push(point.into());
+        self.bounding_rect = self
+            .bounding_rect
+            .map(|bounding_rect| bounding_rect.grow_to(point))
             .or_else(|| {
                 if self.points.len() == 2 {
-                    Some(gee::Rect::from_points(self.points[0], self.points[1]))
+                    Some(Rect::from_points(
+                        self.points[0].into(),
+                        self.points[1].into(),
+                    ))
                 } else {
                     None
                 }
@@ -41,20 +57,17 @@ impl FreePolyBuilder {
         self
     }
 
-    pub fn with_points(self, points: impl IntoIterator<Item = gee::Point<f32>>) -> Self {
+    pub fn with_points(self, points: impl IntoIterator<Item = Point>) -> Self {
         points
             .into_iter()
             .fold(self, |this, point| this.with_point(point))
     }
 
-    pub fn with_line_segment(self, line: gee::LineSegment<f32>) -> Self {
+    pub fn with_line_segment(self, line: LineSegment) -> Self {
         self.with_points(line.points())
     }
 
-    pub fn with_line_segments(
-        self,
-        lines: impl IntoIterator<Item = gee::LineSegment<f32>>,
-    ) -> Self {
+    pub fn with_line_segments(self, lines: impl IntoIterator<Item = LineSegment>) -> Self {
         self.with_points(lines.into_iter().flat_map(|line| line.points()))
     }
 
@@ -88,42 +101,22 @@ impl FreePolyBuilder {
 
     fill!();
 
-    pub fn try_build(self) -> Result<Poly, tess::TessellationError> {
-        crate::try_build(self)
-    }
-
-    pub fn build(self) -> Poly {
-        crate::build(self)
-    }
+    build!();
 }
 
 impl PolyBuilder for FreePolyBuilder {
-    fn build_in_place(
-        self,
-        vertex_buffers: &mut tess::VertexBuffers<Vertex, u32>,
-    ) -> Result<(), tess::TessellationError> {
-        let _count = match self.options.stroke_options.clone() {
-            None => tess::basic_shapes::fill_convex_polyline(
-                self.points.into_iter().map(crate::point),
-                &self.options.fill_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    FillVertexConstructor::new(self.bounding_box.unwrap_or_default()),
-                ),
-            )?,
-            Some(stroke_options) => tess::basic_shapes::stroke_polyline(
-                self.points.into_iter().map(crate::point),
-                !self.open, // closed flag
-                &self.options.stroke_options(),
-                &mut tess::BuffersBuilder::new(
-                    vertex_buffers,
-                    StrokeVertexConstructor::new(
-                        stroke_options.stroke_width,
-                        stroke_options.texture_aspect_ratio,
-                    ),
-                ),
-            )?,
-        };
-        Ok(())
+    fn options(&self) -> &Options {
+        &self.options
+    }
+
+    fn bounding_rect(&self) -> Rect {
+        self.bounding_rect.unwrap_or_default()
+    }
+
+    fn build<B: tess::path::traits::PathBuilder>(self, builder: &mut B) {
+        builder.add_polygon(tess::path::Polygon {
+            points: &self.points,
+            closed: !self.open,
+        });
     }
 }
