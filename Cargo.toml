@@ -1,10 +1,11 @@
 [package]
-name = "pee"
+name = "gon"
 version = "0.1.0"
 authors = ["Brainium Studios LLC"]
 edition = "2018"
-documentation = "https://docs.rs/pee"
-repository = "https://github.com/BrainiumLLC/pee"
+description = "Easy polygon drawing built on top of lyon."
+documentation = "https://docs.rs/gon"
+repository = "https://github.com/BrainiumLLC/gon"
 readme = "README.md"
 keywords = ["geometry", "math", "mathematics"]
 categories = ["graphics"]
@@ -14,7 +15,7 @@ license = "Apache-2.0/MIT"
 serde = ["gee/serde"]
 
 [dependencies]
-gee = { git = "https://github.com/BrainiumLLC/gee", features = ["euclid"] }
+gee = { version = "0.3.0", features = ["euclid"] }
 itertools = "0.10.1"
 lyon_tessellation = "0.17.8"
 thiserror = "1.0.26"
