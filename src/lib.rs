@@ -13,6 +13,7 @@ macro_rules! build {
     };
 }
 
+mod bezier;
 mod circle;
 mod free_poly;
 mod line_segment;
@@ -22,9 +23,15 @@ mod star;
 mod vertex;
 
 pub use self::{
-    circle::CircleBuilder, free_poly::FreePolyBuilder, line_segment::LineSegmentBuilder,
-    options::StrokeOptions, regular_poly::RegularPolyBuilder, round_rect::RoundRectBuilder,
-    star::StarBuilder, vertex::Vertex,
+    bezier::{BezierBuilder, BezierSegment, ControlPoint},
+    circle::CircleBuilder,
+    free_poly::FreePolyBuilder,
+    line_segment::LineSegmentBuilder,
+    options::StrokeOptions,
+    regular_poly::RegularPolyBuilder,
+    round_rect::RoundRectBuilder,
+    star::StarBuilder,
+    vertex::Vertex,
 };
 use self::{
     options::Options,
