@@ -2,7 +2,7 @@
 name = "gon"
 version = "0.1.0"
 authors = ["Brainium Studios LLC"]
-edition = "2018"
+edition = "2021"
 description = "Easy polygon drawing built on top of lyon."
 documentation = "https://docs.rs/gon"
 repository = "https://github.com/BrainiumLLC/gon"
