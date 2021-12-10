@@ -39,20 +39,7 @@ impl RoundRectBuilder {
         self
     }
 
-    pub fn with_clockwise_radii(
-        self,
-        top_left: f32,
-        top_right: f32,
-        bottom_right: f32,
-        bottom_left: f32,
-    ) -> Self {
-        self.with_top_left_radius(top_left)
-            .with_top_right_radius(top_right)
-            .with_bottom_right_radius(bottom_right)
-            .with_bottom_left_radius(bottom_left)
-    }
-
-    pub fn with_uniform_radius(self, radius: f32) -> Self {
+    pub fn with_radius(self, radius: f32) -> Self {
         self.with_clockwise_radii(radius, radius, radius, radius)
     }
 
@@ -94,6 +81,19 @@ impl RoundRectBuilder {
     pub fn with_bottom_left_radius(mut self, radius: f32) -> Self {
         self.bottom_left_radius = radius;
         self
+    }
+
+    pub fn with_clockwise_radii(
+        self,
+        top_left: f32,
+        top_right: f32,
+        bottom_right: f32,
+        bottom_left: f32,
+    ) -> Self {
+        self.with_top_left_radius(top_left)
+            .with_top_right_radius(top_right)
+            .with_bottom_right_radius(bottom_right)
+            .with_bottom_left_radius(bottom_left)
     }
 
     stroke!(public);
