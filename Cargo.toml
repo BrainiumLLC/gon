@@ -1,11 +1,11 @@
 [package]
-name = "gon"
+name = "pendragon"
 version = "0.1.0"
 authors = ["Brainium Studios LLC"]
 edition = "2021"
 description = "Easy polygon drawing built on top of lyon."
-documentation = "https://docs.rs/gon"
-repository = "https://github.com/BrainiumLLC/gon"
+documentation = "https://docs.rs/pendragon"
+repository = "https://github.com/BrainiumLLC/pendragon"
 readme = "README.md"
 keywords = ["geometry", "math", "mathematics"]
 categories = ["graphics"]
